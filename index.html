@@ -1,0 +1,26 @@
+<style>
+    /*隐藏循环播放按钮*/
+    .aplayer .aplayer-info .aplayer-controller .aplayer-time .aplayer-icon.aplayer-icon-loop {
+        display: none;
+    }
+</style>
+<link href="https://cdn.bootcdn.net/ajax/libs/aplayer/1.9.1/APlayer.min.css" rel="stylesheet">
+<div id="aplayer" ></div>
+<script src="https://cdn.bootcdn.net/ajax/libs/aplayer/1.9.1/APlayer.min.js"></script>
+<script>
+    // 获取音乐数据
+    // 初始化音乐播放器
+    function playInit(){
+        return new APlayer({
+            container: document.getElementById('aplayer'),
+            lrcType: 3,
+            audio: [{
+                name: 'name',
+                artist: 'artist',
+                url: 'url.mp3',
+                cover: 'cover.jpg'
+            }]
+        });
+    }
+</script>
+
