@@ -8,19 +8,12 @@
 <div id="aplayer" ></div>
 <script src="https://cdn.bootcdn.net/ajax/libs/aplayer/1.9.1/APlayer.min.js"></script>
 <script>
-    // 获取音乐数据
+    const content = "{{.content}}"
     // 初始化音乐播放器
-    function playInit(){
-        return new APlayer({
-            container: document.getElementById('aplayer'),
-            lrcType: 3,
-            audio: [{
-                name: 'name',
-                artist: 'artist',
-                url: 'url.mp3',
-                cover: 'cover.jpg'
-            }]
-        });
-    }
+   const play = new APlayer({
+        container: document.getElementById('aplayer'),
+        lrcType: 3,
+        audio: JSON.parse(content)
+    });
 </script>
 
