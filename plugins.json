@@ -5,5 +5,5 @@
   "version": "1.0",
   "author": "小游",
   "site": "https://xiaoyou66.com/",
-  "auth": ["widget","tools","database","router","net"]
+  "auth": ["widget","tools","database","router","net","cron"]
 }
