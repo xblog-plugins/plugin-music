@@ -4,14 +4,14 @@ const database =xBlog.database
 const tools =xBlog.tools
 const router = xBlog.router
 const net = xBlog.net
-const cron = xBlog.cron
 
 // 常量
 const keyMusicContent = 'music_content'
-const  keyMusicUserId = 'music_u'
-const  keyMusicMusicId = 'music_id'
-const  keyMusicSync = 'plugin_music_sync'
+const  keyMusicCsrf = 'music_163_csrf'
+const  keyMusicParams = 'music_163_params'
+const  keyMusicEncSecKey = 'music_163_enc'
 const  keyMusicSyncNow = 'plugin_music_sync_now'
+const  keyMusicCookie = 'plugin_music_163_cookie'
 const keyWebServer = 'site_api_server'
 
 // 获取音乐歌词
@@ -38,9 +38,10 @@ widget.addSide("","index.html",function () {
 
 // 添加设置信息
 widget.addSetting("音乐盒设置",1,[
-    {title:"网易云用户id",type: "input",key: keyMusicUserId},
-    {title:"网易云歌单id",type: "input",key: keyMusicMusicId},
-    {title:"每日定时同步",type: "switch",key: keyMusicSync,default:false},
+    {title:"网易云csrf_token",type: "input",key: keyMusicCsrf,default: ''},
+    {title:"网易云params",type: "input",key: keyMusicParams,default: ''},
+    {title:"网易云encSecKey",type: "input",key: keyMusicEncSecKey,default: ''},
+    {title:"网易云cookie",type: "text",key: keyMusicCookie,default: ''},
     {title:"立即同步",type: "row",key: keyMusicSyncNow,default:"admin/plugins/sideMusic"},
 ])
 
@@ -50,27 +51,32 @@ function getMusicContent(context){
     let head = {
         origin: 'https://music.163.com',
         referer:' https://music.163.com/',
-        Cookie : 'MUSIC_U=' + tools.getSetting(keyMusicUserId)
+        Cookie: tools.getSetting(keyMusicCookie)
     }
     // 发送请求
-    net.get('https://music.163.com/api/playlist/detail?id='+tools.getSetting(keyMusicMusicId),head,function (err, res) {
-        if (!err){
+    net.post('https://music.163.com/weapi/v6/playlist/detail?csrf_token='+tools.getSetting(keyMusicCsrf),head,{
+        'params': tools.getSetting(keyMusicParams),
+        'encSecKey': tools.getSetting(keyMusicEncSecKey)
+    },function (err,res){
+        if (!err) {
             let server = tools.getSetting(keyWebServer)
             let data = []
             res = JSON.parse(res)
-            if (res.code!==200){
-                router.response.ResponseServerError(context,"获取歌词失败!")
+            if (res.code !== 200) {
+                router.response.ResponseServerError(context, "获取歌曲失败!")
                 return false
             }
-            res.result.tracks.forEach(function (item){
+            // 解析数据
+            res.playlist.tracks.forEach(function (item){
                 data.push({
                     name: item.name,
-                    artist: item.artists[0].name,
+                    artist: item.ar[0].name,
                     url: 'https://music.163.com/song/media/outer/url?id='+item.id,
-                    cover: tools.strReplace(item.album.picUrl,'http:','',-1),
+                    cover: tools.strReplace(item.al.picUrl,'http:','',-1),
                     lrc: server + "/api/v3/plugins/sideMusic/" + item.id + "/irc"
                 })
             })
+            tools.log(JSON.stringify(data))
             // 保存数据库
             tools.setSetting(keyMusicContent,data)
             router.response.ResponseOk(context,data)
@@ -81,12 +87,4 @@ function getMusicContent(context){
 //  网易云爬虫
 router.registerAdminRouter("GET","",function (context){
     getMusicContent(context)
-})
-
-
-// 注册定时任务
-cron.start("0 0 0 1/1 * ?",function () {
-    if (tools.getSetting(keyMusicSync)){
-        getMusicContent(null)
-    }
 })
