@@ -4,6 +4,6 @@
   "description": "在侧边栏显示音乐盒，可以播放音乐",
   "version": "1.0",
   "author": "小游",
-  "site": "https://xiaoyou66.com/",
+  "site": "https://github.com/xblog-plugins/plugin-music",
   "auth": ["widget","tools","database","router","net","cron"]
 }
